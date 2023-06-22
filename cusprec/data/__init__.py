@@ -1,0 +1,1 @@
+"""CuSPREC data module."""

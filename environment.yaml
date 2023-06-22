@@ -1,0 +1,10 @@
+name: cuda_sprec
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - matplotlib
+  - pillow
+  - pip:
+      - pycuda
