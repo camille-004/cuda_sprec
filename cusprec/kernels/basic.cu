@@ -8,6 +8,19 @@ __global__ void initialize(
     int n,
     int s
 ) {
+    /*
+    Generate the values for sparse signal recovery.
+
+    Args:
+        x (float*): Pointer to the sparse signal vector.
+        A (float*): Pointer to the measurement matrix.
+        b (float*): Pointer to the observed signal vector.
+        rand_vals (float*): Pointer to the random values array.
+        rand_indices (int*): Pointer to the random indices array.
+        m (int): Number of rows in the measurement matrix.
+        n (int): Number of columns in the measurement matrix.
+        s (int): Sparsity level of the sparse signal.
+    */
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
 
     if (idx < s) {
