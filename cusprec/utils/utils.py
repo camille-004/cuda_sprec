@@ -4,54 +4,17 @@ import pycuda.autoinit
 import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 
+from cusprec.constants import KERNEL_PATH
+
 
 n = 1024
 m = 512
 s = 10
 
-mod = SourceModule("""
-    __global__ void initialize(
-        float *x, 
-        float *A, 
-        float *b, 
-        float *rand_vals,
-        int *rand_indices, 
-        int m, 
-        int n, 
-        int s
-    ) {
-        int idx = threadIdx.x + blockIdx.x * blockDim.x;
-        
-        if (idx < s) {
-            int i = rand_indices[idx];
-            x[i] = rand_vals[i * (m + 1)];
-        }
+with open(KERNEL_PATH / "dataset_1.cu") as kernel_file:
+    kernel = kernel_file.read()
 
-        if (idx < n) {            
-            for (int i = 0; i < m; i++) {
-                A[i * n + idx] = rand_vals[idx + i + 1];
-            }
-            
-            float sum_squares = 0.0f;
-            for (int i = 0; i < m; i++) {
-                sum_squares += A[i * n + idx] * A[i * n + idx];
-            }
-            float norm = sqrtf(sum_squares);
-            
-            for (int i = 0; i < m; i++) {
-                A[i * n + idx] /= norm;
-            }
-        }
-        
-        if (idx < m) {
-            float sum = 0.0f;
-            for (int j = 0; j < n; j++) {
-                sum += A[idx * n + j] * x[j];
-            }
-            b[idx] = sum;
-        }
-    }
-""")
+mod = SourceModule(kernel)
 
 initialize = mod.get_function("initialize")
 rand_vals = np.random.randn(n * (m + 1)).astype(np.float32)
