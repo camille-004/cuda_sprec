@@ -95,11 +95,11 @@ class OMP(Algorithm):
         -------
         None
         """
-        mod = self.read_kernel("ops.cu")
-        dot_product = mod.get_function("dotProduct")
-        scalar_multiply = mod.get_function("scalarMultiply")
-        vector_add = mod.get_function("vectorAdd")
-        vector_subtract = mod.get_function("vectorSubtract")
+        ops = self.read_kernel("ops.cu")
+        dot_product = ops.get_function("dotProduct")
+        scalar_multiply = ops.get_function("scalarMultiply")
+        vector_add = ops.get_function("vectorAdd")
+        vector_subtract = ops.get_function("vectorSubtract")
 
         threads_per_block = 256
         blocks_per_grid = (self.m + threads_per_block - 1) // threads_per_block
