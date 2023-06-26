@@ -7,7 +7,7 @@ import pycuda.autoinit
 import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 
-from cusprec.constants import GETTER_ERROR, KERNEL_PATH
+from cusprec.constants import BLOCK_SIZE, GETTER_ERROR, KERNEL_PATH
 
 
 class Dataset:
@@ -152,7 +152,7 @@ class BasicDataset(Dataset):
             np.int32(self._m),
             np.int32(self._n),
             np.int32(self._k),
-            block=(256, 1, 1),
+            block=BLOCK_SIZE,
             grid=(num_blocks, 1),
         )
 

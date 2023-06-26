@@ -5,6 +5,7 @@ import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 
 from cusprec.algorithms.base import Algorithm
+from cusprec.constants import BLOCK_SIZE
 from cusprec.data.dataset import Dataset
 
 
@@ -112,7 +113,7 @@ class OMP(Algorithm):
                 self.r_gpu,
                 c_gpu,
                 np.int32(self.m),
-                block=(256, 1, 1),
+                block=BLOCK_SIZE,
                 grid=(grid_size, 1),
             )
 
@@ -129,7 +130,7 @@ class OMP(Algorithm):
                 d_gpu,
                 np.float64(max_correlation),
                 np.int32(self.n),
-                block=(256, 1, 1),
+                block=BLOCK_SIZE,
                 grid=(grid_size, 1),
             )
             vector_add(
@@ -137,7 +138,7 @@ class OMP(Algorithm):
                 d_gpu,
                 self.s_gpu,
                 np.int32(self.m),
-                block=(256, 1, 1),
+                block=BLOCK_SIZE,
                 grid=(grid_size, 1),
             )
             vector_subtract(
@@ -145,7 +146,7 @@ class OMP(Algorithm):
                 d_gpu,
                 self.r_gpu,
                 np.int32(self.n),
-                block=(256, 1, 1),
+                block=BLOCK_SIZE,
                 grid=(grid_size, 1),
             )
 
