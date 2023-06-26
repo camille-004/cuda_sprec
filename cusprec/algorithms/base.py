@@ -1,20 +1,10 @@
 """Base class for sparse recovery algorithm."""
 from abc import ABC, abstractmethod
-from enum import Enum
-from typing import Any
 
 import numpy as np
-import pycuda.autoinit
-import pycuda.driver as cuda
+from pycuda.compiler import SourceModule
 
-from cusprec.data.dataset import Dataset
-
-
-class AlgorithmType(Enum):
-    """Enumeration of algorithm types."""
-
-    MATCHING_PURSUIT = 1
-    CONVEX_RELAXATION = 2
+from cusprec.constants import KERNEL_PATH
 
 
 class Algorithm(ABC):
@@ -23,44 +13,27 @@ class Algorithm(ABC):
     This class serves as a base for implementing sparse recovery algorithms.
     It defines the common interface and behavior expected from derived
     algorithm classes.
-
-    Parameters
-    ----------
-    kernel : cuda.Function
-        The CUDA kernel function for algorithm execution.
-    dataset : Dataset
-        The input dataset for the algorithm.
-    algorithm_type : AlgorithmType
-        The type of the algorithm.
-    params : dict[str, Any]
-        Additional parameters for configuring the algorithm.
-
-    Attributes
-    ----------
-    kernel : cuda.Function
-        The CUDA kernel function for algorithm execution.
-    dataset : Dataset
-        The input dataset for the algorithm.
-    algorithm_type : AlgorithmType
-        The type of the algorithm.
-    params : dict[str, Any]
-        Additional parameters for configuring the algorithm.
     """
 
-    def __init__(
-        self,
-        kernel: cuda.Function,
-        dataset: Dataset,
-        algorithm_type: AlgorithmType,
-        params: dict[str, Any],
-    ) -> None:
-        self.kernel = kernel
-        self.dataset = dataset
-        self.algorithm_type = algorithm_type
-        self.params = params
+    def read_kernel(self, kernel_name: str) -> SourceModule:
+        """Read the CUDA kernel and wrap it in a SourceModule.
+
+        Parameters
+        ----------
+        kernel_name : str
+            Name of the kernel file.
+
+        Returns
+        -------
+        SourceModule
+            SourceModule containing the CUDA kernel.
+        """
+        with open(KERNEL_PATH / "algorithms" / kernel_name) as kernel_file:
+            kernel = kernel_file.read()
+        return SourceModule(kernel)
 
     @abstractmethod
-    def exec(self) -> None:
+    def execute(self) -> None:
         """Execute the sparse recovery algorithm.
 
         This method executes the sparse recovery algorithm using the provided

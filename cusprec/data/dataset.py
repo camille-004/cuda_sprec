@@ -7,13 +7,13 @@ import pycuda.autoinit
 import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 
-from cusprec.constants import KERNEL_PATH
+from cusprec.constants import GETTER_ERROR, KERNEL_PATH
 
 
 class Dataset:
     """Interface for dataset definitions."""
 
-    def __init__(self, n: int, m: int, s: int) -> None:
+    def __init__(self, n: int, m: int, k: int) -> None:
         """Initialize the dataset.
 
         Parameters
@@ -22,12 +22,12 @@ class Dataset:
             Number of original signal samples.
         m : int
             Number of measurements.
-        s : int
+        k : int
             Sparsity level.
         """
-        self.n = n
-        self.m = m
-        self.s = s
+        self._n = n
+        self._m = m
+        self._k = k
 
     def generate_data(self) -> Any:
         """Generate the dataset by executing a CUDA kernel.
@@ -44,6 +44,36 @@ class Dataset:
         """
         raise NotImplementedError("Subclasses must implement generate_data().")
 
+    def n(self) -> int:
+        """Getter method for n.
+
+        Returns
+        -------
+        int
+            Value of n.
+        """
+        return self._n
+
+    def m(self) -> int:
+        """Getter method for m.
+
+        Returns
+        -------
+        int
+            Value of m.
+        """
+        return self._m
+
+    def k(self) -> int:
+        """Getter method for k.
+
+        Returns
+        -------
+        int
+            Value of k.
+        """
+        return self._k
+
     def plot(self) -> None:
         """Plot the generated dataset.
 
@@ -58,7 +88,7 @@ class Dataset:
 class BasicDataset(Dataset):
     """Basic dataset."""
 
-    def __init__(self, n: int, m: int, s: int) -> None:
+    def __init__(self, n: int, m: int, k: int) -> None:
         """Initialize the dataset.
 
         Parameters
@@ -67,13 +97,13 @@ class BasicDataset(Dataset):
             Number of original signal samples.
         m : int
             Number of measurements.
-        s : int
+        k : int
             Sparsity level.
         """
-        super().__init__(n, m, s)
-        self.x = None
-        self.A = None
-        self.b = None
+        super().__init__(n, m, k)
+        self._x = None
+        self._A = None
+        self._b = None
 
         with open(KERNEL_PATH / "data" / "basic.cu") as kernel_file:
             kernel = kernel_file.read()
@@ -91,19 +121,19 @@ class BasicDataset(Dataset):
             The generated dataset consisting of the sparse signal `x`,
             measurement matrix `A`, and observed signal `b`.
         """
-        rand_vals = np.random.randn(self.n * (self.m + 1)).astype(np.float32)
-        rand_indices = np.random.choice(self.n, self.s, replace=False).astype(
-            np.int32
-        )
-        x = np.zeros(self.n, dtype=np.float32)
-        x[rand_indices] = rand_vals[: self.s]
+        rand_vals = np.random.randn(self._n * (self._m + 1)).astype(np.float32)
+        rand_indices = np.random.choice(
+            self._n, self._k, replace=False
+        ).astype(np.int32)
+        x = np.zeros(self._n, dtype=np.float32)
+        x[rand_indices] = rand_vals[: self._k]
 
         # Allocate memory.
         # For x, Allocate n * 4, (4 bytes for np.float32).
         num_bytes = np.dtype("float32").itemsize
-        x_gpu = cuda.mem_alloc(self.n * num_bytes)
-        A_gpu = cuda.mem_alloc(self.m * self.n * num_bytes)
-        b_gpu = cuda.mem_alloc(self.m * num_bytes)
+        x_gpu = cuda.mem_alloc(self._n * num_bytes)
+        A_gpu = cuda.mem_alloc(self._m * self._n * num_bytes)
+        b_gpu = cuda.mem_alloc(self._m * num_bytes)
         rand_vals_gpu = cuda.mem_alloc(rand_vals.nbytes)
         rand_indices_gpu = cuda.mem_alloc(rand_indices.nbytes)
 
@@ -112,34 +142,39 @@ class BasicDataset(Dataset):
         cuda.memcpy_htod(rand_indices_gpu, rand_indices)
 
         # Generate data.
-        num_blocks = (self.n + 255) // 256
+        num_blocks = (self._n + 255) // 256
         self.func(
             x_gpu,
             A_gpu,
             b_gpu,
             rand_vals_gpu,
             rand_indices_gpu,
-            np.int32(self.m),
-            np.int32(self.n),
-            np.int32(self.s),
+            np.int32(self._m),
+            np.int32(self._n),
+            np.int32(self._k),
             block=(256, 1, 1),
             grid=(num_blocks, 1),
         )
 
         # Copy back to CPU.
-        x = np.empty(self.n, dtype=np.float32)
-        A = np.empty((self.m, self.n), dtype=np.float32)
-        b = np.empty(self.m, dtype=np.float32)
+        x = np.empty(self._n, dtype=np.float32)
+        A = np.empty((self._m, self._n), dtype=np.float32)
+        b = np.empty(self._m, dtype=np.float32)
         cuda.memcpy_dtoh(x, x_gpu)
         cuda.memcpy_dtoh(A, A_gpu)
         cuda.memcpy_dtoh(b, b_gpu)
-        self.x = x
-        self.A = A
-        self.b = b
-        return self.x, self.A, self.b
+        self._x = x
+        self._A = A
+        self._b = b
+        return self._x, self._A, self._b
 
     def plot(self) -> None:
-        """Plot the generated dataset."""
+        """Plot the generated dataset.
+
+        Returns
+        -------
+        None.
+        """
         plt.figure(figsize=(15, 4))
         plt.subplot(1, 3, 1)
         plt.stem(self.x)
@@ -156,3 +191,42 @@ class BasicDataset(Dataset):
 
         plt.tight_layout()
         plt.show()
+
+    @property
+    def x(self) -> np.ndarray:
+        """Getter method for x.
+
+        Returns
+        -------
+        np.ndarray
+            Sparse signal x.
+        """
+        if self._x is None:
+            raise ValueError(GETTER_ERROR)
+        return self._x
+
+    @property
+    def A(self) -> np.ndarray:
+        """Getter method for A.
+
+        Returns
+        -------
+        np.ndarray
+            Measurement matrix A.
+        """
+        if self._A is None:
+            raise ValueError(GETTER_ERROR)
+        return self._A
+
+    @property
+    def b(self) -> np.ndarray:
+        """Getter method for b.
+
+        Returns
+        -------
+        np.ndarray
+            Observed signal b.
+        """
+        if self._b is None:
+            raise ValueError(GETTER_ERROR)
+        return self._b
