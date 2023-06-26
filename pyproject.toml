@@ -1,26 +1,5 @@
-[build-system]
-requires = ["setuptools>=42", "wheel", "pycuda"]
-build-backend = "setuptools.build_meta"
-
-[tool.poetry]
-name = "cuSPREC"
-version = "0.0.1"
-description = "Sparse recovery playground with PyCUDA."
-authors = ["Camille Dunning"]
-readme = "README.md"
-repository = "https://github.com/camille-004/cusprec"
-
-[build-system.requires]
-python = ">=3.10"
-
-[tool.poetry.dependencies]
-python = ">=3.10"
-matplotlib = "^3.4.4"
-pillow = "^9.0.1"
-pycuda = "^2022.2.2"
-
-[build-system]
-requires = ["poetry-core>=1.1.0"]
-
 [tool.isort]
 known_third_party = ["matplotlib", "numpy", "pycuda", "setuptools"]
+
+[tool.black]
+line-length = 79

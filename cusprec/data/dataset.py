@@ -75,7 +75,7 @@ class BasicDataset(Dataset):
         self.A = None
         self.b = None
 
-        with open(KERNEL_PATH / "basic.cu") as kernel_file:
+        with open(KERNEL_PATH / "data" / "basic.cu") as kernel_file:
             kernel = kernel_file.read()
 
         mod = SourceModule(kernel)

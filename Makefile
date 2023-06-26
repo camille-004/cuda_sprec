@@ -10,7 +10,7 @@ clean:
 
 .PHONY: format
 lint:
-	flake8 $(SRC_DIR) main.py --ignore=F841,W503,F401
+	flake8 $(SRC_DIR) main.py --ignore=F841,W503,F401,D107
 
 .PHONY: format
 format:
