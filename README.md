@@ -1,5 +1,8 @@
 # cuda_sprec
 
+A sparse signal recovery library written in PyCUDA.
+
+## Overview
 Sparse recovery algorithms attempt to solve problems in which you have an undetermined system of linear equations, but there the solution is known to be sparse. This can be formalized as follows:
 
 Let $A$ be an $m \times n$ (with $m < n$)  matrix and $b \in \mathbb{R}^m$ be a vector. Find a vector $x \in \mathbb{R}^n$ such that $Ax=b$ and $x$ has the smallest possible number of non-zero entries (`l0` minimization problem, NP-hard).
