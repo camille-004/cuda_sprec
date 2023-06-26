@@ -21,13 +21,7 @@ These algorithms iteratively select the dictionary (measurement matrix)  element
 At ech iteration, select the column of $A$ most correlated with the current residual, add it to the support of the solution, an dadjust the current solution to be the least squares solution consistent with the current support.
 1. Initialize $r=b,S=[]$ (support)
 2. Iterate until the correlated with the current residual, add it to the support of the solution, an dadjust the current solution to be the least squares solution consistent with the current support.
-
-    Initialize
-
-(support)
-Iterate until a stopping condition is met:
-
- a stopping condition is met:
+3. Iterate until a stopping condition is met:
     - $i=\text{argmax}_j\|<r,A_j>\|$
     - $S=S\cup \{i\}$
     - $x_S=\text{argmin}_x\|b-A_Sx\|_2$
