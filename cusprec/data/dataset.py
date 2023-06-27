@@ -1,4 +1,5 @@
 """Dataset definitions."""
+from abc import ABC, abstractmethod, abstractproperty
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -10,25 +11,10 @@ from pycuda.compiler import SourceModule
 from cusprec.constants import BLOCK_SIZE, GETTER_ERROR, KERNEL_PATH
 
 
-class Dataset:
+class Dataset(ABC):
     """Interface for dataset definitions."""
 
-    def __init__(self, n: int, m: int, k: int) -> None:
-        """Initialize the dataset.
-
-        Parameters
-        ----------
-        n : int
-            Number of original signal samples.
-        m : int
-            Number of measurements.
-        k : int
-            Sparsity level.
-        """
-        self._n = n
-        self._m = m
-        self._k = k
-
+    @abstractmethod
     def generate_data(self) -> Any:
         """Generate the dataset by executing a CUDA kernel.
 
@@ -42,8 +28,21 @@ class Dataset:
         Any
             The generated dataset.
         """
-        raise NotImplementedError("Subclasses must implement generate_data().")
+        pass
 
+    @abstractmethod
+    def plot(self) -> None:
+        """Plot the generated dataset.
+
+        Raises
+        ------
+        NotImplementedError
+            Subclasses must implement this method.
+        """
+        raise NotImplementedError("Subclasses must implement plot().")
+
+    @property
+    @abstractmethod
     def n(self) -> int:
         """Getter method for n.
 
@@ -54,6 +53,8 @@ class Dataset:
         """
         return self._n
 
+    @property
+    @abstractmethod
     def m(self) -> int:
         """Getter method for m.
 
@@ -64,6 +65,8 @@ class Dataset:
         """
         return self._m
 
+    @property
+    @abstractmethod
     def k(self) -> int:
         """Getter method for k.
 
@@ -73,16 +76,6 @@ class Dataset:
             Value of k.
         """
         return self._k
-
-    def plot(self) -> None:
-        """Plot the generated dataset.
-
-        Raises
-        ------
-        NotImplementedError
-            Subclasses must implement this method.
-        """
-        raise NotImplementedError("Subclasses must implement plot().")
 
 
 class BasicDataset(Dataset):
@@ -191,6 +184,39 @@ class BasicDataset(Dataset):
 
         plt.tight_layout()
         plt.show()
+
+    @property
+    def n(self) -> int:
+        """Getter method for n.
+
+        Returns
+        -------
+        int
+            Value of n.
+        """
+        return self._n
+
+    @property
+    def m(self) -> int:
+        """Getter method for m.
+
+        Returns
+        -------
+        int
+            Value of m.
+        """
+        return self._m
+
+    @property
+    def k(self) -> int:
+        """Getter method for k.
+
+        Returns
+        -------
+        int
+            Value of k.
+        """
+        return self._k
 
     @property
     def x(self) -> np.ndarray:

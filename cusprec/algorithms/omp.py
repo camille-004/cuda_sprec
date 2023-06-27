@@ -64,9 +64,9 @@ class OMP(Algorithm):
 
     def __init__(self, data: Dataset):
         self.data = data
-        self.m = data.m()
-        self.n = data.n()
-        self.k = data.k()
+        self.m = data.m
+        self.n = data.n
+        self.k = data.k
         self.A = data.A
         self.x = data.x
         self.b = data.b
