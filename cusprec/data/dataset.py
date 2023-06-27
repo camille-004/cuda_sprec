@@ -77,6 +77,48 @@ class Dataset(ABC):
         """
         return self._k
 
+    @property
+    @abstractmethod
+    def x(self) -> np.ndarray:
+        """Getter method for x.
+
+        Returns
+        -------
+        np.ndarray
+            Sparse signal x.
+        """
+        if self._x is None:
+            raise ValueError(GETTER_ERROR)
+        return self._x
+
+    @property
+    @abstractmethod
+    def A(self) -> np.ndarray:
+        """Getter method for A.
+
+        Returns
+        -------
+        np.ndarray
+            Measurement matrix A.
+        """
+        if self._A is None:
+            raise ValueError(GETTER_ERROR)
+        return self._A
+
+    @property
+    @abstractmethod
+    def b(self) -> np.ndarray:
+        """Getter method for b.
+
+        Returns
+        -------
+        np.ndarray
+            Observed signal b.
+        """
+        if self._b is None:
+            raise ValueError(GETTER_ERROR)
+        return self._b
+
 
 class BasicDataset(Dataset):
     """Basic dataset."""
