@@ -2,10 +2,9 @@
 import numpy as np
 import pycuda.autoinit
 import pycuda.driver as cuda
-from pycuda.compiler import SourceModule
 
 from cusprec.algorithms.base import Algorithm
-from cusprec.constants import BLOCK_SIZE
+from cusprec.constants import BLOCK_SIZE, THREADS_PER_BLOCK
 from cusprec.data.dataset import Dataset
 
 
@@ -101,8 +100,7 @@ class OMP(Algorithm):
         vector_add = ops.get_function("vectorAdd")
         vector_subtract = ops.get_function("vectorSubtract")
 
-        threads_per_block = 256
-        blocks_per_grid = (self.m + threads_per_block - 1) // threads_per_block
+        blocks_per_grid = (self.m + THREADS_PER_BLOCK - 1) // THREADS_PER_BLOCK
         grid_size = blocks_per_grid
 
         for i in range(self.k):
@@ -116,6 +114,7 @@ class OMP(Algorithm):
                 block=BLOCK_SIZE,
                 grid=(grid_size, 1),
             )
+            print(c)
 
             # Copy result to CPU.
             cuda.memcpy_dtoh(c, c_gpu)

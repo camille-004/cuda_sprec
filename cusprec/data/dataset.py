@@ -34,12 +34,11 @@ class Dataset(ABC):
     def plot(self) -> None:
         """Plot the generated dataset.
 
-        Raises
-        ------
-        NotImplementedError
-            Subclasses must implement this method.
+        Returns
+        -------
+        None
         """
-        raise NotImplementedError("Subclasses must implement plot().")
+        pass
 
     @property
     @abstractmethod
@@ -135,7 +134,9 @@ class BasicDataset(Dataset):
         k : int
             Sparsity level.
         """
-        super().__init__(n, m, k)
+        self._n = n
+        self._m = m
+        self._k = k
         self._x = None
         self._A = None
         self._b = None
